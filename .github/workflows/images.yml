@@ -1,0 +1,20 @@
+# Images sur GHCR (charte Abnd, R44, ADR 0002) : chaque image est construite une seule fois, à la fusion dans dev,
+# et seulement si les sources de son service ont changé (.github/images/services.json). staging, main et les versions
+# la reprennent sans la reconstruire (promotion.yml). Images privées, amd64 et arm64. Jamais latest.
+# Sans .github/images/services.json, ces workflows ne font rien : un projet sans conteneur peut les garder.
+# Avec des tests, les lancer avant le build : un job « tests » (uses: ./.github/workflows/tests.yml) et « needs: tests » ici.
+name: Images
+
+on:
+  push:
+    branches: [dev]
+
+concurrency:
+  group: images-dev
+  cancel-in-progress: false
+
+jobs:
+  images:
+    permissions: { contents: read, packages: write }
+    uses: abnd-corp/gouvernance/.github/workflows/images-dev.yml@8bea9c55412c228911d6157ce327f22bf1bfeb43 # gouvernance, 21 novembre 2026
+    with: { gouvernance: 8bea9c55412c228911d6157ce327f22bf1bfeb43 }
